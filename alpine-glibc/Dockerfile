@@ -1,36 +1,30 @@
-FROM alpine:3.6
+FROM docker.repo/alpine-base:3.9.4
 
 # Here we install GNU libc (aka glibc) and set C.UTF-8 locale as default.
 
-RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
-    ALPINE_GLIBC_PACKAGE_VERSION="2.26-r0" && \
-    ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-    ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-    ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-    apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
+RUN GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
+    GLIBC_PACKAGE_VERSION="2.29-r0" && \
+    GLIBC_BASE_PACKAGE_FILENAME="glibc-$GLIBC_PACKAGE_VERSION.apk" && \
+    GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$GLIBC_PACKAGE_VERSION.apk" && \
+    GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$GLIBC_PACKAGE_VERSION.apk" && \
+    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
     wget \
-        "https://raw.githubusercontent.com/andyshinn/alpine-pkg-glibc/master/sgerrand.rsa.pub" \
-        -O "/etc/apk/keys/sgerrand.rsa.pub" && \
-    wget \
-        "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-        "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-        "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
+        "$GLIBC_BASE_URL/$GLIBC_PACKAGE_VERSION/$GLIBC_BASE_PACKAGE_FILENAME" \
+        "$GLIBC_BASE_URL/$GLIBC_PACKAGE_VERSION/$GLIBC_BIN_PACKAGE_FILENAME" \
+        "$GLIBC_BASE_URL/$GLIBC_PACKAGE_VERSION/$GLIBC_I18N_PACKAGE_FILENAME" && \
     apk add --no-cache \
-        "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-        "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-        "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
+        "$GLIBC_BASE_PACKAGE_FILENAME" \
+        "$GLIBC_BIN_PACKAGE_FILENAME" \
+        "$GLIBC_I18N_PACKAGE_FILENAME" && \
     \
     rm "/etc/apk/keys/sgerrand.rsa.pub" && \
     /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 C.UTF-8 || true && \
     echo "export LANG=C.UTF-8" > /etc/profile.d/locale.sh && \
     \
     apk del glibc-i18n && \
-    \
-    rm "/root/.wget-hsts" && \
-    apk del .build-dependencies && \
     rm \
-        "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-        "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-        "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
+        "$GLIBC_BASE_PACKAGE_FILENAME" \
+        "$GLIBC_BIN_PACKAGE_FILENAME" \
+        "$GLIBC_I18N_PACKAGE_FILENAME"
 
 ENV LANG=C.UTF-8
