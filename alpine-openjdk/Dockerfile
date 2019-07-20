@@ -1,6 +1,6 @@
 FROM docker.repo/alpine-base:3.9.4
 
-MAINTAINER Ming.Chen <uchenm@gmail.com>
+LABEL MAINTAINER="Ming.Chen<uchenm@gmail.com>"
 
 
 # Default to UTF-8 file.encoding
