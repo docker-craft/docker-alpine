@@ -1,0 +1,32 @@
+FROM docker.repo.io/alpine-base:3.10
+
+LABEL MAINTAINER="Ming.Chen<uchenm@gmail.com>"
+
+
+# Default to UTF-8 file.encoding
+ENV LANG C.UTF-8
+
+# add a simple script that can auto-detect the appropriate JAVA_HOME value
+# based on whether the JDK or only the JRE is installed
+RUN { \
+		echo '#!/bin/sh'; \
+		echo 'set -e'; \
+		echo; \
+		echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
+	} > /usr/local/bin/docker-java-home \
+	&& chmod +x /usr/local/bin/docker-java-home && \
+	\
+    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
+    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.28-r0/glibc-2.28-r0.apk && \
+    apk add glibc-2.28-r0.apk
+
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
+ENV PATH $PATH:/usr/lib/jvm/java-11-openjdk/jre/bin:/usr/lib/jvm/java-11-openjdk/bin
+
+ENV JAVA_VERSION 11u04
+ENV JAVA_ALPINE_VERSION 11.0.4_p4-r1
+
+RUN set -x \
+	&& apk update \
+	&& apk add --no-cache openjdk11="$JAVA_ALPINE_VERSION" \
+	&& [ "$JAVA_HOME" = "$(docker-java-home)" ]
